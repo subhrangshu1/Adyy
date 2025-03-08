@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secret Letters</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body {
+        text-align: center;
+        font-family: 'Times New Roman', serif;
+        background: linear-gradient(to bottom right, #333333, #444444);
+        color: white;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    h2 {
+        font-family: 'Times New Roman', serif;
+        font-size: 30px;
+        color: white;
+        margin-bottom: 40px;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        padding: 0 20px;
+    }
+
+    .hidden { display: none; }
+
+    #slidingPanel {
+        position: fixed;
+        top: 0;
+        left: -300px;
+        width: 100%;
+        max-width: 300px;
+        height: 100%;
+        background-color: #333333;
+        padding: 20px;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+        transition: left 0.5s ease-in-out;
+        z-index: 1000;
+    }
+
+    #slidingPanel.open {
+        left: 0;
+    }
+
+    .user-box {
+        position: relative;
+        margin-bottom: 30px;
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+    }
+
+    .user-box input {
+        width: calc(100% - 50px);
+        padding: 10px;
+        background: #f4f4f4;
+        border: none;
+        outline: none;
+        border-radius: 5px;
+        box-sizing: border-box;
+        font-size: 18px;
+    }
+
+    .user-box label {
+        position: absolute;
+        top: 0;
+        left: 10px;
+        font-size: 18px;
+        color: #888;
+        pointer-events: none;
+        transition: 0.3s;
+    }
+
+    .user-box input:focus + label,
+    .user-box input:valid + label {
+        top: -20px;
+        left: 10px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .password-toggle-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 24px;
+    }
+
+    #slidingPanel button {
+        background-color: #444444;
+        color: white;
+        border: none;
+        padding: 18px 35px;
+        border-radius: 30px;
+        cursor: pointer;
+        font-size: 20px;
+        transition: background-color 0.3s, transform 0.2s;
+        width: 100%; /* Make button take full width */
+    }
+
+    #slidingPanel button:hover {
+        background-color: #555555;
+        transform: scale(1.1);
+    }
+
+    #toggleButton {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background-color: #f2c600;
+        color: white;
+        border: none;
+        padding: 18px 35px;
+        border-radius: 30px;
+        cursor: pointer;
+        font-size: 20px;
+        transition: background-color 0.3s, transform 0.2s;
+        z-index: 1001;
+    }
+
+    #toggleButton:hover {
+        background-color: #ff9f00;
+        transform: scale(1.05);
+    }
+
+    #content {
+        display: none;
+        margin-top: 30px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.6);
+        width: 80%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #imageGallery img {
+        max-width: 140px;
+        margin: 12px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    }
+
+    #imageGallery img:hover {
+        transform: scale(1.1);
+        box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    @keyframes fallButterflies {
+        0% {
+            top: -100px;
+            opacity: 1;
+        }
+        100% {
+            top: 100vh;
+            opacity: 0;
+        }
+    }
+
+    .rose {
+        position: absolute;
+        top: -50px;
+        font-size: 30px;
+        animation: fallButterflies 5s linear infinite;
+        opacity: 0.8;
+    }
+
+    .password-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .password-toggle-button {
+        padding: 10px 18px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #f2c600;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        transition: background-color 0.3s;
+    }
+
+    .password-toggle-button:hover {
+        background-color: #ff9f00;
+    }
+
+    @media (max-width: 600px) {
+        h2 {
+            font-size: 24px;
+        }
+
+        #slidingPanel {
+            width: 100%;
+        }
+
+        #toggleButton {
+            padding: 15px 25px;
+        }
+
+        .user-box input {
+            font-size: 16px;
+        }
+
+        #content {
+            padding: 20px;
+        }
+
+        .password-toggle-button {
+            padding: 8px 16px;
+        }
+    }
+  </style>
+</head>
+<body>
+<h2>Mr. Mangloo aur Miss Angry ke world mein aapka swagat hai</h2>
+
+<button id="toggleButton" onclick="togglePanel()">Open Password</button>
+
+<!-- Sliding Panel -->
+<div id="slidingPanel">
+  <h2>yaha daalo</h2>
+  <form id="passwordForm" onsubmit="checkPassword(event)">
+    <div class="user-box">
+      <label for="passwordInput">ab toh deh doh zoor se</label>
+      <input type="password" id="passwordInput" required="" oninput="createRoses()" />
+    </div>
+    <div class="password-actions">
+      <button type="submit">Submit</button>
+      <button type="button" class="password-toggle-button" onclick="togglePassword()">
+        <i class="fas fa-eye" id="togglePasswordIcon"></i>
+      </button>
+    </div>
+  </form>
+  <p id="error" style="color: red;" class="hidden">chashma pehen!</p>
+</div>
+
+<div id="content">
+  <h4>Baby, are you ready? 💖</h4>
+  <div id="Click me"></div>
+  <p>zoor se touch kro: <a href="https://drive.google.com/drive/folders/1iazRGu1TQC4RSz7R4ZEmB14Nykd8VXZq?usp=sharing" target="_blank">Image Gallery <span class="heart-icon">❤️</span></a></p>
+</div>
+
+<script>
+  let db;
+  const request = indexedDB.open("ImageDB", 1);
+
+  request.onupgradeneeded = function(event) {
+      db = event.target.result;
+      if (!db.objectStoreNames.contains("images")) {
+          db.createObjectStore("images", { autoIncrement: true });
+      }
+  };
+
+  request.onsuccess = function(event) {
+      db = event.target.result;
+  };
+
+  function togglePanel() {
+      const panel = document.getElementById("slidingPanel");
+      panel.classList.toggle("open");
+      document.getElementById("passwordInput").focus();
+  }
+
+  function checkPassword(event) {
+      event.preventDefault();
+      const password = document.getElementById("passwordInput").value.toLowerCase(); // Convert input to lowercase
+      if (password === "muwah") {  // Stored password in lowercase
+          document.getElementById("content").style.display = "block";
+          document.getElementById("error").classList.add("hidden");
+          loadImages();
+      } else {
+          document.getElementById("error").classList.remove("hidden");
+      }
+  }
+
+  function loadImages() {
+      if (!db) return;
+      const gallery = document.getElementById("imageGallery");
+      gallery.innerHTML = "";
+
+      const transaction = db.transaction(["images"], "readonly");
+      const store = transaction.objectStore("images");
+      const request = store.openCursor();
+
+      request.onsuccess = function(event) {
+          const cursor = event.target.result;
+          if (cursor) {
+              const img = document.createElement("img");
+              const blob = cursor.value;
+              const url = URL.createObjectURL(blob);
+              img.src = url;
+              gallery.appendChild(img);
+              cursor.continue();
+          }
+      };
+  }
+
+  function createRoses() {
+      const roseContainer = document.getElementById('slidingPanel');
+      const rose = document.createElement("div");
+      rose.classList.add("rose");
+      rose.style.left = `${Math.random() * 100}%`; // Random X position
+      rose.textContent = "🌹"; // Rose emoji
+      rose.style.animationDuration = `${Math.random() * 2 + 3}s`; // Random fall speed
+      roseContainer.appendChild(rose);
+      setTimeout(() => {
+          rose.remove();
+      }, 5000); // Remove rose after 5s
+  }
+
+  function togglePassword() {
+      const passwordInput = document.getElementById("passwordInput");
+      const toggleIcon = document.getElementById("togglePasswordIcon");
+      if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          toggleIcon.classList.remove("fa-eye");
+          toggleIcon.classList.add("fa-eye-slash");
+      } else {
+          passwordInput.type = "password";
+          toggleIcon.classList.remove("fa-eye-slash");
+          toggleIcon.classList.add("fa-eye");
+      }
+  }
+
+  // Trigger the Open Password button on Enter key press
+  document.getElementById("passwordInput").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+          document.getElementById("toggleButton").click();
+      }
+  });
+</script>
+</body>
+</html>
